@@ -8,7 +8,7 @@ from fastapi import FastAPI, File, UploadFile, Depends, HTTPException, status
 from pydantic import BaseModel
 
 # Placeholder for the version - to be updated with the CI process
-__version__ = '0.0.2'
+__version__ = '0.0.3'
 
 
 class ConvertResult(BaseModel):
@@ -43,9 +43,9 @@ async def convert_file(file: UploadFile = File("file_to_convert"), encoding: str
     attempts = 1
     while attempts >= 0:
         try:
-            _text = textract.process(_tmp_file_name,language='rus').decode(encoding)
+            _text = textract.process(_tmp_file_name,language='rus+eng').decode(encoding)
             if len(_text.strip())<10:
-                _text = textract.process(_tmp_file_name,method='tesseract',language='rus').decode(encoding)
+                _text = textract.process(_tmp_file_name,method='tesseract',language='rus+eng').decode(encoding)
             break
         except Exception as e:
             print('Conversion issue:', _tmp_file_name, e)
