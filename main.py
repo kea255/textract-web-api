@@ -8,7 +8,7 @@ from fastapi import FastAPI, File, UploadFile, Depends, HTTPException, status
 from pydantic import BaseModel
 
 # Placeholder for the version - to be updated with the CI process
-__version__ = '0.0.3'
+__version__ = '0.0.4'
 
 
 class ConvertResult(BaseModel):
@@ -17,6 +17,16 @@ class ConvertResult(BaseModel):
     text_length: int
     file_name: str
     messages: str
+
+def cyrillic_percentage_broad(text):
+    cyrillic_count = 0
+    total_characters = len(text)
+    if total_characters == 0:
+        return 0.0
+    for char in text:
+        if '\u0400' <= char <= '\u04FF' or '\u0500' <= char <= '\u052F': # Unicode ranges for Cyrillic
+            cyrillic_count += 1
+    return (cyrillic_count / total_characters) * 100
 
 
 app = FastAPI()
@@ -46,6 +56,8 @@ async def convert_file(file: UploadFile = File("file_to_convert"), encoding: str
             _text = textract.process(_tmp_file_name,language='rus+eng').decode(encoding)
             if len(_text.strip())<10:
                 _text = textract.process(_tmp_file_name,method='tesseract',language='rus+eng').decode(encoding)
+            if cyrillic_percentage_broad(_text)<50:
+                _text = textract.process(_tmp_file_name,method='tesseract',language='rus').decode(encoding)
             break
         except Exception as e:
             print('Conversion issue:', _tmp_file_name, e)
