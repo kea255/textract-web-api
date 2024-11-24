@@ -5,7 +5,7 @@ RUN apt-get update && \
     apt-get install -y libxml2-dev libxslt1-dev antiword unrtf poppler-utils tesseract-ocr-rus libjpeg-dev && \
     apt-get clean
 
-RUN pip install --no-cache-dir textract uvicorn fastapi python-multipart
+RUN pip install --no-cache-dir textract uvicorn fastapi python-multipart pillow-heif
 
 RUN mkdir /app
 WORKDIR /app/

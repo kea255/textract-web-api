@@ -2,13 +2,15 @@ import os
 import secrets
 import tempfile
 from datetime import datetime as dt
+from PIL import Image
+from pillow_heif import register_heif_opener
 
 import textract
 from fastapi import FastAPI, File, UploadFile, Depends, HTTPException, status
 from pydantic import BaseModel
 
 # Placeholder for the version - to be updated with the CI process
-__version__ = '0.0.4'
+__version__ = '0.0.5'
 
 
 class ConvertResult(BaseModel):
@@ -49,6 +51,13 @@ async def convert_file(file: UploadFile = File("file_to_convert"), encoding: str
         _content = await file.read()
         _file.write(_content)
         _tmp_file_name = _file.name
+
+    if file_extension == '.heic':
+        register_heif_opener()
+        image = Image.open(_tmp_file_name)
+        image.save(_tmp_file_name.replace('.heic','.jpg'), format='jpeg')
+        os.remove(_tmp_file_name)
+        _tmp_file_name = _tmp_file_name.replace('.heic','.jpg')
 
     attempts = 1
     while attempts >= 0:
