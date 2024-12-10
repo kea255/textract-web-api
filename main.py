@@ -10,7 +10,7 @@ from fastapi import FastAPI, File, UploadFile, Depends, HTTPException, status
 from pydantic import BaseModel
 
 # Placeholder for the version - to be updated with the CI process
-__version__ = '0.0.5'
+__version__ = '0.0.6'
 
 
 class ConvertResult(BaseModel):
@@ -30,6 +30,30 @@ def cyrillic_percentage_broad(text):
             cyrillic_count += 1
     return (cyrillic_count / total_characters) * 100
 
+def fix_image_orientation(image_path):
+    image = Image.open(image_path)
+    try:
+        exif = image._getexif()
+        orientation = exif.get(0x0112)  # Получаем тег ориентации
+        if orientation == 2:
+            image = image.transpose(Image.FLIP_LEFT_RIGHT)
+        elif orientation == 3:
+            image = image.rotate(180, expand=True)
+        elif orientation == 4:
+            image = image.transpose(Image.FLIP_TOP_BOTTOM)
+        elif orientation == 5:
+            image = image.transpose(Image.FLIP_LEFT_RIGHT).rotate(270, expand=True)
+        elif orientation == 6:
+            image = image.rotate(270, expand=True)
+        elif orientation == 7:
+            image = image.transpose(Image.FLIP_TOP_BOTTOM).rotate(270)
+        elif orientation == 8:
+            image = image.rotate(90, expand=True)
+        if orientation in [2, 3, 4, 5, 6, 7, 8]:
+            image.save(image_path, quality=90)
+    except (AttributeError, KeyError, IndexError):
+        pass  # Если EXIF-данные отсутствуют, ничего не делаем
+    image.close()
 
 app = FastAPI()
 _start_time = dt.now()
@@ -58,6 +82,9 @@ async def convert_file(file: UploadFile = File("file_to_convert"), encoding: str
         image.save(_tmp_file_name.replace('.heic','.jpg'), format='jpeg')
         os.remove(_tmp_file_name)
         _tmp_file_name = _tmp_file_name.replace('.heic','.jpg')
+        
+    if file_extension in ['.jpg', '.jpeg']:
+        fix_image_orientation(_tmp_file_name)
 
     attempts = 1
     while attempts >= 0:
