@@ -7,6 +7,8 @@ RUN apt-get update && \
 
 RUN pip install --no-cache-dir textract uvicorn fastapi python-multipart pillow-heif
 
+COPY replace_lib/image.py /usr/local/lib/python3.9/site-packages/textract/parsers/image.py
+
 RUN mkdir /app
 WORKDIR /app/
 COPY *.py /app/
