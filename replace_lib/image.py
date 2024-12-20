@@ -22,10 +22,13 @@ class Parser(ShellParser):
     def extract(self, filename, **kwargs):
     
         #detect rotation
-        stdout, _ = self.run(['tesseract', filename, 'stdout', '--psm', '0'])
-        rotation_angle = int(stdout.decode("utf-8").split("\n")[2].split(":")[-1].strip())
-        if rotation_angle != 0:
-            self.rotate_ppm_image(filename, -rotation_angle)
+        try:
+            stdout, _ = self.run(['tesseract', filename, 'stdout', '--psm', '0'])
+            rotation_angle = int(stdout.decode("utf-8").split("\n")[2].split(":")[-1].strip())
+            if rotation_angle != 0:
+                self.rotate_ppm_image(filename, -rotation_angle)
+        except Exception as e:
+            print(f"Err: {e}")
 
         # if language given as argument, specify language for tesseract to use
         if 'language' in kwargs:
