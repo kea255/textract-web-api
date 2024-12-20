@@ -7,6 +7,7 @@ from pillow_heif import register_heif_opener
 
 import textract
 from fastapi import FastAPI, File, UploadFile, Depends, HTTPException, status
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 # Placeholder for the version - to be updated with the CI process
@@ -56,6 +57,13 @@ def fix_image_orientation(image_path):
     image.close()
 
 app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 _start_time = dt.now()
 
 
