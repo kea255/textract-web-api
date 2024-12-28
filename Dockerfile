@@ -13,6 +13,6 @@ RUN mkdir /app
 WORKDIR /app/
 COPY *.py /app/
 
-ENTRYPOINT ["uvicorn", "--host", "0.0.0.0", "--port", "8000", "--workers", "1", "main:app"]
+ENTRYPOINT ["uvicorn", "--host", "0.0.0.0", "--port", "8000", "--workers", "4", "main:app"]
 
 EXPOSE 8000

@@ -100,7 +100,7 @@ async def convert_file(file: UploadFile = File("file_to_convert"), encoding: str
             _text = textract.process(_tmp_file_name,language='rus+eng').decode(encoding)
             if len(_text.strip())<10:
                 _text = textract.process(_tmp_file_name,method='tesseract',language='rus+eng').decode(encoding)
-            if cyrillic_percentage_broad(_text)<50:
+            if len(_text.strip())>250 and cyrillic_percentage_broad(_text)<50:
                 _text = textract.process(_tmp_file_name,method='tesseract',language='rus').decode(encoding)
             break
         except Exception as e:
